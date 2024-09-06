@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI, Request, Response
 import httpx
-from urllib.parse import urlparse, urlunparse, unquote
+import requests
 
 app = FastAPI()
 
@@ -11,19 +11,14 @@ app = FastAPI()
 def hello_world():
     return "Hello,World"
 
-@app.post("/reverse-proxy{path:path}")
-async def proxy_request(req: Request, path: str):
-    target_url = "https://alexisbb-smartradio.hf.space"
-    print(target_url+ path)
-    target_path = target_url+ path
-    print(target_path)
-    async with httpx.AsyncClient() as client:
-        proxy_res = await client.request(
-            method=req.method,
-            url=target_path,
-            headers=req.headers,
-            content=await req.body()
-        )
+@app.post("/reverse-proxy")
+async def proxy_request(req: Request):
+    target_url = "https://alexisbb-smartradio.hf.space/get_radio_audio"
+    async with httpx.AsyncClient(timeout=1000) as client:
+        proxy_res = await client.post(target_url+"/", content=await req.body())
+        print(f"Request sent: {req.method} {req.url}")
+        print(f"Target URL response: {proxy_res.status_code} {proxy_res.content}")
+        print(f"Proxy URL response: {proxy_res.url}")
     return Response(
         status_code=proxy_res.status_code,
         headers=dict(proxy_res.headers),
