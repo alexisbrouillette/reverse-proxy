@@ -2,7 +2,6 @@
 
 from fastapi import FastAPI, Request, Response
 import httpx
-import requests
 
 app = FastAPI()
 
