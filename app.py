@@ -12,7 +12,7 @@ def hello_world():
 
 @app.post("/proxy")
 async def proxy_request(req: Request):
-    target_url = "https://target-api.com/endpoint"
+    target_url = "https://alexisbb-smartradio-api.hf.space"
     async with httpx.AsyncClient() as client:
         proxy_res = await client.request(
             method=req.method,
