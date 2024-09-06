@@ -1,7 +1,7 @@
 #app.py
 
 from fastapi import FastAPI, Request, Response
-from httpx import fetch
+import httpx
 
 app = FastAPI()
 
@@ -13,17 +13,17 @@ def hello_world():
 @app.post("/proxy")
 async def proxy_request(req: Request):
     target_url = "https://target-api.com/endpoint"
-    proxy_req = Request(
-        method=req.method,
-        url=target_url,
-        headers=req.headers,
-        body=await req.body()
-    )
-    proxy_res = await fetch(proxy_req)
+    async with httpx.AsyncClient() as client:
+        proxy_res = await client.request(
+            method=req.method,
+            url=target_url,
+            headers=req.headers,
+            content=await req.body()
+        )
     return Response(
-        status_code=proxy_res.status,
+        status_code=proxy_res.status_code,
         headers=dict(proxy_res.headers),
-        content=proxy_res.body
+        content=proxy_res.content
     )
 
 if __name__ == '__main__':
